@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <title>CES Pallet Capture</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: white;
+            text-align: center;
+            font-size: 2em;
+            margin: 0;
+            font-family: "Quantico", serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        .session {
+            border-top: 2px solid white;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .img-thumbnail {
+            width: 30%;
+            margin: 5px;
+            border: 2px solid white;
+            cursor: pointer;
+        }
+        .capture-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            margin: 20px 0;
+        }
+        .capture-btn:hover {
+            background-color: #218838;
+        }
+               /* Lightbox modal should fill screen */
+        .modal-dialog {
+            max-width: 100%;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+        .modal-content {
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+        .modal-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        .modal-body img {
+            width: auto;
+            height: auto;
+            max-width: 95%;
+            max-height: 95vh;
+            object-fit: contain; /* Keeps aspect ratio */
+        }
+
+        .modal-body img {
+            max-width: 95%;
+            max-height: 95vh;
+            object-fit: contain;
+        }
+        .modal-footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .modal-footer button {
+            font-size: 1.5em;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CES: Today's Pallets</h1>
+
+        {% for session in captured_sessions %}
+        <div class="session">
+            <h1>{{ session.folder }}</h1>
+            {% for img in session.images %}
+                <img
+                     src="{{ img.replace('captured_images/', '/captured_images/') }}"
+                     class="img-thumbnail"
+                     alt="Captured Image"
+                     onclick="openLightbox('{{ img.replace('captured_images/', '/captured_images/') }}', '{{ loop.index0 }}')">
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Full-Screen Lightbox Modal -->
+    <div class="modal fade" id="lightboxModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img id="lightboxImage" src="" alt="Large Image">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="prevImage()">❮ Prev</button>
+                    <button class="btn btn-secondary" onclick="nextImage()">Next ❯</button>
+                    <button class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & JavaScript Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    let imageArray = [];
+    let currentIndex = 0;
+
+    function openLightbox(imgSrc, index) {
+        // Ensure correct URL formatting
+        let baseUrl = window.location.origin;
+        imageArray = [...document.querySelectorAll(".img-thumbnail")].map(img => new URL(img.src, baseUrl).href);
+
+        currentIndex = parseInt(index);
+        document.getElementById("lightboxImage").src = imageArray[currentIndex];
+
+        new bootstrap.Modal(document.getElementById("lightboxModal")).show();
+    }
+
+    function prevImage() {
+        currentIndex = (currentIndex - 1 + imageArray.length) % imageArray.length;
+        document.getElementById("lightboxImage").src = imageArray[currentIndex];
+    }
+
+    function nextImage() {
+        currentIndex = (currentIndex + 1) % imageArray.length;
+        document.getElementById("lightboxImage").src = imageArray[currentIndex];
+    }
+
+    // Ensure proper navigation with keyboard controls
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft") prevImage();
+        if (event.key === "ArrowRight") nextImage();
+        if (event.key === "Escape") document.querySelector('.modal.show button[data-bs-dismiss="modal"]').click();
+    });
+
+    </script>
+</body>
+</html>

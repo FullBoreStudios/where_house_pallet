@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <title>CES Pallet Capture</title>
+    <style>
+        body {
+            background-color: #28a745;
+            color: white;
+            text-align: center;
+            font-size: 3em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: "Quantico", serif;
+        }
+        button {
+            padding: 20px;
+            font-size: 1.5em;
+            margin-top: 20px;
+            cursor: pointer;
+            font-family: "Quantico", serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">CES Pallet Capture</div>
+    <button id="captureBtn" onclick="captureImages()">Capture Pallet</button>
+
+    <script>
+        function captureImages() {
+            document.getElementById("status").innerText = "CAPTURING...";
+            document.body.style.backgroundColor = "#ffc107";
+            document.getElementById("captureBtn").disabled = true;
+
+            fetch("/capture", { method: "POST" })
+                .then(() => {
+                    window.location.href = "/pallet/"; // Redirect to main view after capture
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    document.getElementById("status").innerText = "ERROR";
+                    document.body.style.backgroundColor = "#dc3545";
+                });
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === " " || event.code === "Space") {
+                event.preventDefault();
+                captureImages();
+            }
+        });
+    </script>
+</body>
+</html>
