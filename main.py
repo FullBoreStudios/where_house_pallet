@@ -36,6 +36,27 @@ def pallet_capture():
     return render_template("pallet.html")  # New capture page
 
 
+@app.route("/browse/")
+def browse_images():
+    # Get all folders in captured_images directory
+    all_folders = sorted(glob.glob(os.path.join(BASE_DIR, "*")), reverse=True)
+
+    # Prepare data structure for templates
+    all_sessions = []
+    for folder in all_folders:
+        if not os.path.isdir(folder):
+            continue
+        
+        folder_name = os.path.basename(folder)
+        image_files = sorted(glob.glob(os.path.join(folder, "*.jpg")))
+        images = [os.path.join(folder, os.path.basename(img)) for img in image_files]
+
+        if images:
+            all_sessions.append({"folder": folder_name, "images": images})
+
+    return render_template("browse.html", captured_sessions=all_sessions)
+
+
 @app.route("/capture/", methods=["POST"])
 def capture():
     functions.capture_images()

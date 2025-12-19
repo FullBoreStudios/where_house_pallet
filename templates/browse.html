@@ -10,7 +10,7 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <title>CES Pallet Capture</title>
+    <title>Browse All Pallets - CES</title>
     <style>
         body {
             background-color: #1e1e1e;
@@ -59,19 +59,7 @@
             border: 2px solid white;
             cursor: pointer;
         }
-        .capture-btn {
-            background-color: #28a745;
-            color: white;
-            padding: 15px;
-            font-size: 1.2em;
-            cursor: pointer;
-            border: none;
-            margin: 20px 0;
-        }
-        .capture-btn:hover {
-            background-color: #218838;
-        }
-               /* Lightbox modal should fill screen */
+        /* Lightbox modal should fill screen */
         .modal-dialog {
             max-width: 100%;
             width: 100%;
@@ -99,12 +87,6 @@
             height: auto;
             max-width: 95%;
             max-height: 95vh;
-            object-fit: contain; /* Keeps aspect ratio */
-        }
-
-        .modal-body img {
-            max-width: 95%;
-            max-height: 95vh;
             object-fit: contain;
         }
         .modal-footer {
@@ -123,25 +105,29 @@
 </head>
 <body>
     <div class="container">
-        <h1>CES: Today's Pallets</h1>
+        <h1>CES: Browse All Captured Pallets</h1>
 
         <div class="nav-buttons">
-            <a href="/browse/" class="nav-btn">Browse All Pallets</a>
+            <a href="/" class="nav-btn">Today's Pallets</a>
             <a href="/pallet/" class="nav-btn">Capture New Pallet</a>
         </div>
 
-        {% for session in captured_sessions %}
-        <div class="session">
-            <h1>{{ session.folder }}</h1>
-            {% for img in session.images %}
-                <img
-                     src="{{ img.replace('captured_images/', '/captured_images/') }}"
-                     class="img-thumbnail"
-                     alt="Captured Image"
-                     onclick="openLightbox('{{ img.replace('captured_images/', '/captured_images/') }}', '{{ loop.index0 }}')">
+        {% if captured_sessions %}
+            {% for session in captured_sessions %}
+            <div class="session">
+                <h1>{{ session.folder }}</h1>
+                {% for img in session.images %}
+                    <img
+                         src="{{ img.replace('captured_images/', '/captured_images/') }}"
+                         class="img-thumbnail"
+                         alt="Captured Image"
+                         onclick="openLightbox('{{ img.replace('captured_images/', '/captured_images/') }}', '{{ loop.index0 }}', '{{ loop.parent.loop.index0 }}')">
+                {% endfor %}
+            </div>
             {% endfor %}
-        </div>
-        {% endfor %}
+        {% else %}
+            <p>No captured images found.</p>
+        {% endif %}
     </div>
 
     <!-- Full-Screen Lightbox Modal -->
@@ -167,12 +153,20 @@
     let imageArray = [];
     let currentIndex = 0;
 
-    function openLightbox(imgSrc, index) {
+    function openLightbox(imgSrc, imgIndex, sessionIndex) {
         // Ensure correct URL formatting
         let baseUrl = window.location.origin;
         imageArray = [...document.querySelectorAll(".img-thumbnail")].map(img => new URL(img.src, baseUrl).href);
 
-        currentIndex = parseInt(index);
+        // Calculate global index from session and image indices
+        let sessionDivs = document.querySelectorAll(".session");
+        let globalIndex = 0;
+        for (let i = 0; i < sessionIndex; i++) {
+            globalIndex += sessionDivs[i].querySelectorAll(".img-thumbnail").length;
+        }
+        globalIndex += parseInt(imgIndex);
+
+        currentIndex = globalIndex;
         document.getElementById("lightboxImage").src = imageArray[currentIndex];
 
         new bootstrap.Modal(document.getElementById("lightboxModal")).show();
@@ -188,13 +182,15 @@
         document.getElementById("lightboxImage").src = imageArray[currentIndex];
     }
 
-    // Ensure proper navigation with keyboard controls
+    // Keyboard navigation
     document.addEventListener("keydown", (event) => {
         if (event.key === "ArrowLeft") prevImage();
         if (event.key === "ArrowRight") nextImage();
-        if (event.key === "Escape") document.querySelector('.modal.show button[data-bs-dismiss="modal"]').click();
+        if (event.key === "Escape") {
+            let closeBtn = document.querySelector('.modal.show button[data-bs-dismiss="modal"]');
+            if (closeBtn) closeBtn.click();
+        }
     });
-
     </script>
 </body>
 </html>
