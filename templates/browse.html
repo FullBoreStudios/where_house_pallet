@@ -118,10 +118,10 @@
                 <h1>{{ session.folder }}</h1>
                 {% for img in session.images %}
                     <img
-                         src="{{ img.replace('captured_images/', '/captured_images/') }}"
+                         src="{{ '/' + img.replace('\\', '/') }}"
                          class="img-thumbnail"
                          alt="Captured Image"
-                         onclick="openLightbox('{{ img.replace('captured_images/', '/captured_images/') }}')">
+                         onclick="openLightbox('{{ '/' + img.replace('\\', '/') }}')">
                 {% endfor %}
             </div>
             {% endfor %}
