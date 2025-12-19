@@ -121,7 +121,7 @@
                          src="{{ img.replace('captured_images/', '/captured_images/') }}"
                          class="img-thumbnail"
                          alt="Captured Image"
-                         onclick="openLightbox('{{ img.replace('captured_images/', '/captured_images/') }}', '{{ loop.index0 }}', '{{ loop.parent.loop.index0 }}')">
+                         onclick="openLightbox('{{ img.replace('captured_images/', '/captured_images/') }}')">
                 {% endfor %}
             </div>
             {% endfor %}
@@ -153,20 +153,15 @@
     let imageArray = [];
     let currentIndex = 0;
 
-    function openLightbox(imgSrc, imgIndex, sessionIndex) {
+    function openLightbox(imgSrc) {
         // Ensure correct URL formatting
         let baseUrl = window.location.origin;
         imageArray = [...document.querySelectorAll(".img-thumbnail")].map(img => new URL(img.src, baseUrl).href);
 
-        // Calculate global index from session and image indices
-        let sessionDivs = document.querySelectorAll(".session");
-        let globalIndex = 0;
-        for (let i = 0; i < sessionIndex; i++) {
-            globalIndex += sessionDivs[i].querySelectorAll(".img-thumbnail").length;
-        }
-        globalIndex += parseInt(imgIndex);
+        // Find the index of the clicked image
+        currentIndex = imageArray.findIndex(src => src === new URL(imgSrc, baseUrl).href);
+        if (currentIndex === -1) currentIndex = 0;
 
-        currentIndex = globalIndex;
         document.getElementById("lightboxImage").src = imageArray[currentIndex];
 
         new bootstrap.Modal(document.getElementById("lightboxModal")).show();
