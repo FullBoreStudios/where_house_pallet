@@ -38,8 +38,14 @@ def pallet_capture():
 
 @app.route("/browse/")
 def browse_images():
-    # Get all folders in captured_images directory
-    all_folders = sorted(glob.glob(os.path.join(BASE_DIR, "*")), reverse=True)
+    # Get all folders in captured_images directory, sorted by actual date (newest first)
+    def folder_date_key(folder):
+        try:
+            return datetime.strptime(os.path.basename(folder).split("_")[0], "%m-%d-%Y")
+        except ValueError:
+            return datetime.min
+
+    all_folders = sorted(glob.glob(os.path.join(BASE_DIR, "*")), key=folder_date_key, reverse=True)
 
     # Prepare data structure for templates
     all_sessions = []
